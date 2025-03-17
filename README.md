@@ -20,8 +20,6 @@ and uses the following states for the directory entry:
 - S     : SHARED    : present in multiple caches, clean
 - U     : UNOWNED   : not cached in any processor
 
-Cache hits work off of the MESI states, and cache misses off of directory states.
-
 ## Directory Entry
 
 Each directory entry contains:
@@ -71,7 +69,7 @@ Note that, while the memory is distributed across nodes, the memory regions comb
 
 ## Output
 
-You will have to use `printProcessorState` function to dump the contents of the processor, after it has processed all the instructions. **IMPORTANT: DO NOT MODIFY THE FUNCTION, EVALUATION WILL BE BASED OFF OF THIS OUTPUT.** Note that you can use `printProcState` to dump multiple times, ensuring that instructions and message handlingof all processors in complete. Evaluation will be done in a transparent manner, and any loss of marks will be explained.
+You will have to use `printProcessorState` function to dump the contents of the processor, after it has processed all the instructions. **IMPORTANT: DO NOT MODIFY THE FUNCTION, EVALUATION WILL BE BASED OFF OF THIS OUTPUT.** Note that you can use `printProcState` to dump multiple times, ensuring that instructions and message handling of all processors in complete. Evaluation will be done in a transparent manner, and any loss of marks will be explained.
 
 **IMPORTANT: Please wrap all debug statements within `#ifdef DEBUG` and `#endif`.** Example:
 ```
@@ -92,7 +90,7 @@ gcc -fopenmp -o cache_simulator assignment.c -O2
 
 Debug build:
 ```
-gcc -fopenmp -o cache_simulator assignment.c -O0 -D DEBUG
+gcc -fopenmp -o cache_simulator assignment.c -O0 -D DEBUG -g
 ```
 
 Execution:

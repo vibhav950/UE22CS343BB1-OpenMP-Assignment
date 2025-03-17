@@ -80,7 +80,7 @@ typedef struct messageBuffer {
     // a circular queue message buffer
     int head;
     int tail;
-    int count;
+    int count;          // store total number of messages processed by the node
 } messageBuffer;
 
 typedef struct processorNode {
@@ -321,6 +321,10 @@ int main( int argc, char * argv[] ) {
                 }
                 // even though there are no more instructions, this processor might
                 // still need to react to new transaction messages
+                //
+                // once all the processors are done printing and appear to have no
+                // more network transactions, please terminate the program by sending
+                // a SIGINT ( CTRL+C )
                 continue;
             }
             instr = node.instructions[ instructionIdx ];
