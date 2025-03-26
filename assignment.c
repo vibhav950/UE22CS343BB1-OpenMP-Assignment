@@ -387,17 +387,19 @@ void handleCacheReplacement( int sender, cacheLine oldCacheLine ) {
     byte procNodeAddr = ;
     
     switch ( oldCacheLine.state ) {
+        case EXCLUSIVE:
         case SHARED:
             // IMPLEMENT
-            // If cache line was shared, inform home node about the eviction
+            // If cache line was shared or exclusive, inform home node about the
+            // eviction
             break;
         case MODIFIED:
             // IMPLEMENT
             // If cache line was modified, send updated value to home node 
             // so that memory can be updated before eviction
             break;
-        default:
-            // No action required for INVALID or EXCLUSIVE states
+        case INVALID:
+            // No action required for INVALID state
             break;
     }
 }
@@ -464,30 +466,32 @@ void printProcessorState(int processorId, processorNode node) {
     printf("=======================================\n\n");
 
     // Print memory state
-    printf("----------- Memory State -----------\n");
-    printf("| Index |  Value  |\n");
-    printf("|-----------------|\n");
+    printf("-------- Memory State --------\n");
+    printf("| Index | Address |   Value  |\n");
+    printf("|----------------------------|\n");
     for (int i = 0; i < MEM_SIZE; i++) {
-        printf("|  %3d  |  %5d  |\n", i, node.memory[i]);
+        printf("|  %3d  |  0x%02X   |  %5d   |\n", i, ( processorId << 4 ) + i,
+                node.memory[i]);
     }
-    printf("------------------------------------\n\n");
+    printf("------------------------------\n\n");
 
     // Print directory state
-    printf("---------- Directory State ---------\n");
-    printf("| Index | State | BitVector      |\n");
-    printf("|--------------------------------|\n");
+    printf("------------ Directory State ---------------\n");
+    printf("| Index | Address | State |    BitVector   |\n");
+    printf("|------------------------------------------|\n");
     for (int i = 0; i < MEM_SIZE; i++) {
-        printf("|  %3d  |   %2s  |   0x%08B   |\n", 
-               i, dirStateStr[node.directory[i].state], node.directory[i].bitVector);
+        printf("|  %3d  |  0x%02X   |  %2s   |   0x%08B   |\n", i,
+                ( processorId << 4 ) + i, dirStateStr[node.directory[i].state],
+                node.directory[i].bitVector);
     }
-    printf("------------------------------------\n\n");
-
+    printf("--------------------------------------------\n\n");
+    
     // Print cache state
     printf("------------ Cache State ----------------\n");
-    printf("| Index | Address | Value |  State      |\n");
+    printf("| Index | Address | Value |    State    |\n");
     printf("|---------------------------------------|\n");
     for (int i = 0; i < CACHE_SIZE; i++) {
-        printf("|  %3d  |  0x%02X  |  %3d  |  %8s \t|\n", 
+        printf("|  %3d  |  0x%02X   |  %3d  |  %8s \t|\n", 
                i, node.cache[i].address, node.cache[i].value,
                cacheStateStr[node.cache[i].state]);
     }
