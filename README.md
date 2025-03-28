@@ -85,7 +85,7 @@ The final output should only contain the dump from `printProcessorState`.
 
 Regular build:
 ```
-gcc -fopenmp -o cache_simulator assignment.c -O2
+gcc -fopenmp -o cache_simulator assignment.c
 ```
 
 Debug build:
