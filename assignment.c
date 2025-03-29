@@ -142,11 +142,14 @@ int main( int argc, char * argv[] ) {
                 messageBuffers[ threadId ].count > 0 &&
                 messageBuffers[ threadId ].head != messageBuffers[ threadId ].tail
             ) {
+                if ( printProcState == 0 ) {
+                    printProcState++;
+                }
                 int head = messageBuffers[ threadId ].head;
                 msg = messageBuffers[ threadId ].queue[ head ];
                 messageBuffers[ threadId ].head = ( head + 1 ) % MSG_BUFFER_SIZE;
 
-                #ifdef DEBUG
+                #ifdef DEBUG_MSG
                 printf( "Processor %d msg from: %d, type: %d, address: 0x%02X\n",
                         threadId, msg.sender, msg.type, msg.address );
                 #endif /* ifdef DEBUG */
@@ -329,7 +332,7 @@ int main( int argc, char * argv[] ) {
             }
             instr = node.instructions[ instructionIdx ];
 
-            #ifdef DEBUG
+            #ifdef DEBUG_INSTR
             printf( "Processor %d: instr type=%c, address=0x%02X, value=%hhu\n",
                     threadId, instr.type, instr.address, instr.value );
             #endif
@@ -448,9 +451,7 @@ void initializeProcessor( int threadId, processorNode *node, char *dirName ) {
     }
 
     fclose( file );
-    #ifdef DEBUG
     printf( "Processor %d initialized\n", threadId );
-    #endif /* ifdef DEBUG */
 }
 
 void printProcessorState(int processorId, processorNode node) {
@@ -459,42 +460,50 @@ void printProcessorState(int processorId, processorNode node) {
                                            "INVALID" };
     static const char *dirStateStr[] = { "EM", "S", "U" };
 
-    #pragma omp critical
-    {
-    printf("=======================================\n");
-    printf(" Processor Node: %d\n", processorId);
-    printf("=======================================\n\n");
+    char filename[32];
+    snprintf(filename, sizeof(filename), "core_%d_output.txt", processorId);
+
+    FILE *file = fopen(filename, "w");
+    if (!file) {
+        printf("Error: Could not open file %s\n", filename);
+        return;
+    }
+
+    fprintf(file, "=======================================\n");
+    fprintf(file, " Processor Node: %d\n", processorId);
+    fprintf(file, "=======================================\n\n");
 
     // Print memory state
-    printf("-------- Memory State --------\n");
-    printf("| Index | Address |   Value  |\n");
-    printf("|----------------------------|\n");
+    fprintf(file, "-------- Memory State --------\n");
+    fprintf(file, "| Index | Address |   Value  |\n");
+    fprintf(file, "|----------------------------|\n");
     for (int i = 0; i < MEM_SIZE; i++) {
-        printf("|  %3d  |  0x%02X   |  %5d   |\n", i, ( processorId << 4 ) + i,
+        fprintf(file, "|  %3d  |  0x%02X   |  %5d   |\n", i, (processorId << 4) + i,
                 node.memory[i]);
     }
-    printf("------------------------------\n\n");
+    fprintf(file, "------------------------------\n\n");
 
     // Print directory state
-    printf("------------ Directory State ---------------\n");
-    printf("| Index | Address | State |    BitVector   |\n");
-    printf("|------------------------------------------|\n");
+    fprintf(file, "------------ Directory State ---------------\n");
+    fprintf(file, "| Index | Address | State |    BitVector   |\n");
+    fprintf(file, "|------------------------------------------|\n");
     for (int i = 0; i < MEM_SIZE; i++) {
-        printf("|  %3d  |  0x%02X   |  %2s   |   0x%08B   |\n", i,
-                ( processorId << 4 ) + i, dirStateStr[node.directory[i].state],
+        fprintf(file, "|  %3d  |  0x%02X   |  %2s   |   0x%08B   |\n",
+                i, (processorId << 4) + i, dirStateStr[node.directory[i].state],
                 node.directory[i].bitVector);
     }
-    printf("--------------------------------------------\n\n");
+    fprintf(file, "--------------------------------------------\n\n");
     
     // Print cache state
-    printf("------------ Cache State ----------------\n");
-    printf("| Index | Address | Value |    State    |\n");
-    printf("|---------------------------------------|\n");
+    fprintf(file, "------------ Cache State ----------------\n");
+    fprintf(file, "| Index | Address | Value |    State    |\n");
+    fprintf(file, "|---------------------------------------|\n");
     for (int i = 0; i < CACHE_SIZE; i++) {
-        printf("|  %3d  |  0x%02X   |  %3d  |  %8s \t|\n", 
+        fprintf(file, "|  %3d  |  0x%02X   |  %3d  |  %8s \t|\n",
                i, node.cache[i].address, node.cache[i].value,
                cacheStateStr[node.cache[i].state]);
     }
-    printf("----------------------------------------\n\n");
-    }
+    fprintf(file, "----------------------------------------\n\n");
+
+    fclose(file);
 }

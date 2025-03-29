@@ -90,7 +90,7 @@ gcc -fopenmp -o cache_simulator assignment.c
 
 Debug build:
 ```
-gcc -fopenmp -o cache_simulator assignment.c -O0 -D DEBUG -g
+gcc -fopenmp -o cache_simulator assignment.c -O0 -D DEBUG_MSG -D DEBUG_INSTR -g
 ```
 
 Execution:
