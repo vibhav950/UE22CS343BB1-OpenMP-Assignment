@@ -1,5 +1,16 @@
 # Directory-Based Cache Coherence Protocol Simulation
 
+## Student Details
+
+Name: Vibhav Tiwari
+
+SRN: PES1UG22CS686
+
+> [!NOTE]
+> Since test_3 and test_4 will most likely require running the executable multiple times till all the respective diffs for any of the given reference outputs (`run_*`) match, I have written two shell scripts, `test3.sh` and `test4.sh` for test_3 and test_4, respectively, that loop until we have a valid output.
+
+## Introduction
+
 In this assignment, you will be implementing a directory-based cache coherence protocol in a distributed shared memory ( DSM ) system. The protocol which you will be implementing is based off of [DASH](https://dl.acm.org/doi/10.1145/325096.325132), but is not 1:1 replica. The implementation details will be explained in the subsequent sections. The system consists of multiple processor nodes, which will be simulated using OpenMP. Each processor contains:
 - Local cache   : direct-mapped, with `CACHE_SIZE` entries
 - Local memory
