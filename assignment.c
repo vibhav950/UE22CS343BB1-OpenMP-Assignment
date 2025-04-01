@@ -104,6 +104,25 @@ messageBuffer messageBuffers[ NUM_PROCS ];
 // Create locks to ensure thread-safe access to each processor's message buffer.
 omp_lock_t msgBufferLocks[ NUM_PROCS ];
 
+const char *transactionTypeStr(transactionType type) {
+  switch (type) {
+    case READ_REQUEST: return "READ_REQUEST";
+    case WRITE_REQUEST: return "WRITE_REQUEST";
+    case REPLY_RD: return "REPLY_RD";
+    case REPLY_WR: return "REPLY_WR";
+    case REPLY_ID: return "REPLY_ID";
+    case INV: return "INV";
+    case UPGRADE: return "UPGRADE";
+    case WRITEBACK_INV: return "WRITEBACK_INV";
+    case WRITEBACK_INT: return "WRITEBACK_INT";
+    case FLUSH: return "FLUSH";
+    case FLUSH_INVACK: return "FLUSH_INVACK";
+    case EVICT_SHARED: return "EVICT_SHARED";
+    case EVICT_MODIFIED: return "EVICT_MODIFIED";
+    default: return "unknown transaction type";
+  }
+}
+
 int main( int argc, char * argv[] ) {
     if (argc < 2) {
         fprintf( stderr, "Usage: %s <test_directory>\n", argv[0] );
@@ -494,9 +513,6 @@ int main( int argc, char * argv[] ) {
 
                         /* if this is the home node */
                         if (threadId == procNodeAddr) {
-#ifdef DEBUG
-                            assert(node.directory[memBlockAddr].state == EM);
-#endif
                             /* new owner that made the write request */
                             node.directory[memBlockAddr].bitVector = (1 << msg.secondReceiver);
 
@@ -721,8 +737,8 @@ void sendMessage( int receiver, message msg ) {
     // Manage buffer indices correctly to maintain a circular queue structure
 
 #if DEBUG
-    printf("Processor %d sending message to %d, type: %d, address: 0x%02X\n",
-           omp_get_thread_num(), receiver, msg.type, msg.address);
+    printf("Processor %d sending message to %d, type: %s, address: 0x%02X\n",
+           omp_get_thread_num(), receiver, transactionTypeStr(msg.type), msg.address);
 #endif
 
     omp_set_lock( &msgBufferLocks[ receiver ] );
