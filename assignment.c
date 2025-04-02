@@ -548,8 +548,15 @@ int main( int argc, char * argv[] ) {
                         // If in remaining sharer ( new owner ), update cacheline
                         // from SHARED to EXCLUSIVE
 
-                        /* is this the home node? */
-                        if (threadId == procNodeAddr) {
+                        if (threadId != procNodeAddr) {
+                            /**
+                             * if not the home node, update cache line state
+                            */
+#ifdef DEBUG
+                            assert(node.cache[cacheIndex].state == SHARED);
+#endif
+                            node.cache[ cacheIndex ].state = EXCLUSIVE; /* S -> E */
+                        } else /* this is the home node */ {
                             /* update directory */
                             node.directory[memBlockAddr].bitVector &= ~(1 << msg.sender);
 
@@ -565,20 +572,20 @@ int main( int argc, char * argv[] ) {
                                  * that it can change the cache state S -> E
                                  */
                                 int newOwner = __builtin_ctz(node.directory[memBlockAddr].bitVector);
-                                msg = (message) {
-                                    .type = EVICT_SHARED,
-                                    .sender = threadId,
-                                    .address = msg.address,
-                                    .value = node.memory[ memBlockAddr ],
-                                };
-                                sendMessage( newOwner, msg );
+
+                                if (newOwner != procNodeAddr) {
+                                    msg = (message) {
+                                        .type = EVICT_SHARED,
+                                        .sender = threadId,
+                                        .address = msg.address,
+                                        .value = node.memory[ memBlockAddr ],
+                                    };
+                                    sendMessage( newOwner, msg );
+                                } else {
+                                    /* update cache line */
+                                    node.cache[ cacheIndex ].state = EXCLUSIVE; /* S -> E */
+                                }
                             } // else S -> S
-                        } else /* not the home node */ {
-                            /* update cacheline state */
-#ifdef DEBUG
-                            assert(node.cache[cacheIndex].state == SHARED);
-#endif
-                            node.cache[ cacheIndex ].state = EXCLUSIVE; /* S -> E */
                         }
                         break;
 
