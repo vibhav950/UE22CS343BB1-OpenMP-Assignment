@@ -6,7 +6,7 @@
 while true; do
     ./cache_simulator test_3 &
     proc_pid=$!
-    sleep 0.5
+    sleep 1
 
     kill -9 $proc_pid 2>/dev/null
     pkill -P $proc_pid 2>/dev/null
